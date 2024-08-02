@@ -40,6 +40,7 @@ static cvar_t *vid_displayindex;
 static cvar_t *vid_highdpiaware;
 static cvar_t *vid_rate;
 
+#ifndef __WIIU__
 static int last_flags = 0;
 static int last_display = 0;
 static int last_position_x = SDL_WINDOWPOS_UNDEFINED;
@@ -47,7 +48,7 @@ static int last_position_y = SDL_WINDOWPOS_UNDEFINED;
 static SDL_Window* window = NULL;
 static qboolean initSuccessful = false;
 static char **displayindices = NULL;
-static int num_displays = 0;
+static int num_displays = 1;
 
 /*
  * Resets the display index Cvar if out of bounds
@@ -228,6 +229,7 @@ CreateSDLWindow(int flags, int w, int h)
 static int
 GetFullscreenType()
 {
+	return 1;
 	if (SDL_GetWindowFlags(window) & SDL_WINDOW_FULLSCREEN_DESKTOP)
 	{
 		return 2;
@@ -392,6 +394,7 @@ ShutdownGraphics(void)
 	initSuccessful = false; // not initialized anymore
 }
 // --------
+#endif
 
 /*
  * Initializes the SDL video subsystem. Must
@@ -405,6 +408,8 @@ GLimp_Init(void)
 	vid_highdpiaware = Cvar_Get("vid_highdpiaware", "0", CVAR_ARCHIVE);
 	vid_rate = Cvar_Get("vid_rate", "-1", CVAR_ARCHIVE);
 
+#ifdef __WIIU__
+#else
 	if (!SDL_WasInit(SDL_INIT_VIDEO))
 	{
 		if (SDL_Init(SDL_INIT_VIDEO) == -1)
@@ -429,6 +434,7 @@ GLimp_Init(void)
 		PrintDisplayModes();
 		Com_Printf("------------------------------------\n\n");
 	}
+#endif
 
 	return true;
 }
@@ -441,6 +447,7 @@ GLimp_Init(void)
 void
 GLimp_Shutdown(void)
 {
+#ifndef __WIIU__
 	ShutdownGraphics();
 
 	// SDL_INIT_VIDEO implies SDL_INIT_EVENTS
@@ -455,8 +462,10 @@ GLimp_Shutdown(void)
 	}
 
 	ClearDisplayIndices();
+#endif
 }
 
+#ifndef __WIIU__
 /*
  * Determine if we want to be high dpi aware. If
  * we are we must scale ourself. If we are not the
@@ -485,6 +494,7 @@ Glimp_DetermineHighDPISupport(int flags)
 
 	return flags;
 }
+#endif
 
 /*
  * (Re)initializes the actual window.
@@ -492,6 +502,13 @@ Glimp_DetermineHighDPISupport(int flags)
 qboolean
 GLimp_InitGraphics(int fullscreen, int *pwidth, int *pheight)
 {
+#ifdef __WIIU__
+	re.GetDrawableSize(&viddef.width, &viddef.height);
+	*pwidth = viddef.width;
+	*pheight = viddef.height;
+	Com_Printf("Drawable size: %ix%i\n", viddef.width, viddef.height);
+
+#else
 	int flags;
 	int curWidth, curHeight;
 	int width = *pwidth;
@@ -700,7 +717,7 @@ GLimp_InitGraphics(int fullscreen, int *pwidth, int *pheight)
 	SDL_ShowCursor(0);
 
 	initSuccessful = true;
-
+#endif
 	return true;
 }
 
@@ -710,8 +727,10 @@ GLimp_InitGraphics(int fullscreen, int *pwidth, int *pheight)
 void
 GLimp_ShutdownGraphics(void)
 {
+#ifndef __WIIU__
 	SDL_GL_ResetAttributes();
 	ShutdownGraphics();
+#endif
 }
 
 /*
@@ -720,6 +739,7 @@ GLimp_ShutdownGraphics(void)
 void
 GLimp_GrabInput(qboolean grab)
 {
+#ifndef __WIIU__
 	if(window != NULL)
 	{
 		SDL_SetWindowGrab(window, grab ? SDL_TRUE : SDL_FALSE);
@@ -730,6 +750,7 @@ GLimp_GrabInput(qboolean grab)
 		Com_Printf("WARNING: Setting Relative Mousemode failed, reason: %s\n", SDL_GetError());
 		Com_Printf("         You should probably update to SDL 2.0.3 or newer!\n");
 	}
+#endif
 }
 
 /*
@@ -738,7 +759,7 @@ GLimp_GrabInput(qboolean grab)
 float
 GLimp_GetRefreshRate(void)
 {
-
+#ifndef __WIIU__
 	if (vid_displayrefreshrate->value > -1 ||
 			vid_displayrefreshrate->modified)
 	{
@@ -762,6 +783,7 @@ GLimp_GetRefreshRate(void)
 			glimp_refreshRate = 60;
 		}
 	}
+#endif
 
 	return glimp_refreshRate;
 }
@@ -772,6 +794,10 @@ GLimp_GetRefreshRate(void)
 qboolean
 GLimp_GetDesktopMode(int *pwidth, int *pheight)
 {
+#ifdef __WIIU__
+	*pwidth = 1280;
+	*pheight = 768;
+#else
 	// Declare display mode structure to be filled in.
 	SDL_DisplayMode mode;
 
@@ -799,25 +825,39 @@ GLimp_GetDesktopMode(int *pwidth, int *pheight)
 	}
 	*pwidth = mode.w;
 	*pheight = mode.h;
+#endif
+
 	return true;
 }
 
 const char**
 GLimp_GetDisplayIndices(void)
 {
+#ifdef __WIIU__
+	return NULL;
+#else
 	return (const char**)displayindices;
+#endif
 }
 
 int
 GLimp_GetNumVideoDisplays(void)
 {
+#ifdef __WIIU__
+	return 1;
+#else
 	return num_displays;
+#endif
 }
 
 int
 GLimp_GetWindowDisplayIndex(void)
 {
+#ifdef __WIIU__
+	return 1;
+#else
 	return last_display;
+#endif
 }
 
 int

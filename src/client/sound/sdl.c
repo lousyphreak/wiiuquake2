@@ -1503,7 +1503,9 @@ SDL_BackendShutdown(void)
 qboolean
 SDL_BackendInit(void)
 {
+#ifndef __WIIU__
 	char reqdriver[128];
+#endif
 	SDL_AudioSpec desired;
 	SDL_AudioSpec obtained;
 	int tmp, val;
@@ -1529,8 +1531,10 @@ SDL_BackendInit(void)
 	s_sdldriver = (Cvar_Get("s_sdldriver", "dsp", CVAR_ARCHIVE));
 #endif
 
+#ifndef __WIIU__
 	snprintf(reqdriver, sizeof(reqdriver), "%s=%s", "SDL_AUDIODRIVER", s_sdldriver->string);
 	putenv(reqdriver);
+#endif
 
 	Com_Printf("Starting SDL audio callback.\n");
 

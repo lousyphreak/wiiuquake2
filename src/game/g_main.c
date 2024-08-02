@@ -49,11 +49,11 @@ cvar_t *timelimit;
 cvar_t *password;
 cvar_t *spectator_password;
 cvar_t *needpass;
-cvar_t *maxclients;
+//cvar_t *maxclients;
 cvar_t *maxspectators;
 cvar_t *maxentities;
 cvar_t *g_select_empty;
-cvar_t *dedicated;
+//cvar_t *dedicated;
 cvar_t *g_footsteps;
 cvar_t *g_monsterfootsteps;
 cvar_t *g_fix_triggered;
@@ -144,8 +144,13 @@ SpawnEntities_f(char *mapname, char *entities, char *spawnpoint)
  * with all entry points and global
  * variables
  */
+#ifdef __WIIU__
+game_export_t *
+GetGameAPIStatic(game_import_t *import)
+#else
 Q2_DLL_EXPORTED game_export_t *
 GetGameAPI(game_import_t *import)
+#endif
 {
 	gi = *import;
 
@@ -178,6 +183,7 @@ GetGameAPI(game_import_t *import)
 	return &globals;
 }
 
+#ifndef __WIIU__
 /*
  * this is only here so the functions
  * in shared source files can link
@@ -207,7 +213,7 @@ Com_Printf(const char *msg, ...)
 
 	gi.dprintf("%s", text);
 }
-
+#endif
 /* ====================================================================== */
 
 void

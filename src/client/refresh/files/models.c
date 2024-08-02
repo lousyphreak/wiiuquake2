@@ -26,6 +26,18 @@
 
 #include "../ref_shared.h"
 
+#ifdef __FLOAT_HACK__
+static inline void endianSwap2(float* dst, const float* src) {
+	uint8_t* dstP=(uint8_t*)dst;
+	uint8_t* srcP=(uint8_t*)src;
+
+	dstP[0] = srcP[3];
+	dstP[1] = srcP[2];
+	dstP[2] = srcP[1];
+	dstP[3] = srcP[0];
+}
+#endif
+
 /*
 =================
 Mod_LoadAliasModel/Mod_LoadMD2
@@ -162,8 +174,13 @@ Mod_LoadMD2 (const char *mod_name, const void *buffer, int modfilelen,
 		memcpy (poutframe->name, pinframe->name, sizeof(poutframe->name));
 		for (j=0 ; j<3 ; j++)
 		{
+#ifdef __FLOAT_HACK__
+			endianSwap2(&poutframe->scale[j], &pinframe->scale[j]);
+			endianSwap2(&poutframe->translate[j], &pinframe->translate[j]);
+#else
 			poutframe->scale[j] = LittleFloat (pinframe->scale[j]);
 			poutframe->translate[j] = LittleFloat (pinframe->translate[j]);
+#endif
 		}
 		// verts are all 8 bit, so no swapping needed
 		memcpy (poutframe->verts, pinframe->verts,
@@ -515,9 +532,15 @@ Mod_LoadVertexes(const char *name, mvertex_t **vertexes, int *numvertexes,
 
 	for (i = 0; i < count; i++, in++, out++)
 	{
+#ifdef __FLOAT_HACK__
+		endianSwap2(&out->position[0], &in->point[0]);
+		endianSwap2(&out->position[1], &in->point[1]);
+		endianSwap2(&out->position[2], &in->point[2]);
+#else
 		out->position[0] = LittleFloat(in->point[0]);
 		out->position[1] = LittleFloat(in->point[1]);
 		out->position[2] = LittleFloat(in->point[2]);
+#endif
 	}
 }
 
@@ -579,8 +602,13 @@ Mod_LoadTexinfo(const char *name, mtexinfo_t **texinfo, int *numtexinfo,
 
 		for (j = 0; j < 4; j++)
 		{
+#ifdef __FLOAT_HACK__
+			endianSwap2(&out->vecs[0][j], &in->vecs[0][j]);
+			endianSwap2(&out->vecs[1][j], &in->vecs[1][j]);
+#else
 			out->vecs[0][j] = LittleFloat(in->vecs[0][j]);
 			out->vecs[1][j] = LittleFloat(in->vecs[1][j]);
+#endif
 		}
 
 		out->flags = LittleLong (in->flags);
@@ -695,12 +723,20 @@ Mod_LoadPlanes(const char *name, cplane_t **planes, int *numplanes,
 		bits = 0;
 		for (j=0 ; j<3 ; j++)
 		{
+#ifdef __FLOAT_HACK__
+			endianSwap2(&out->normal[j], &in->normal[j]);
+#else
 			out->normal[j] = LittleFloat (in->normal[j]);
+#endif
 			if (out->normal[j] < 0)
 				bits |= 1<<j;
 		}
 
+#ifdef __FLOAT_HACK__
+		endianSwap2(&out->dist, &in->dist);
+#else
 		out->dist = LittleFloat (in->dist);
+#endif
 		out->type = LittleLong (in->type);
 		out->signbits = bits;
 	}

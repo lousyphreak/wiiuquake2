@@ -1,26 +1,111 @@
-# Yamagi Quake II
+# wiiuQuake2
 
-Yamagi Quake II is an enhanced client for id Software's Quake
-II with focus on offline and coop gameplay. Both the gameplay and the graphics
-are unchanged, but many bugs in the last official release were fixed and some
-nice to have features like widescreen support and a modern OpenGL 3.2 renderer
-were added. Unlike most other Quake II source ports Yamagi Quake II is fully 64-bit
-clean. It works perfectly on modern processors and operating systems. Yamagi
-Quake II runs on nearly all common platforms; including FreeBSD, Linux, NetBSD,
-OpenBSD, Windows and macOS (experimental).
+This port is based on yquake2, and the gl3 renderer. It runs the main game stable
+(startup demo loop for hours), allows switching mods (ONLY during the intro video).
+Currently it only runs at ~20fps (rarely hitting 30) during the demo loop on the
+console, and 60fps on Cemu with the CPU interpreter.
 
-This code is built upon Icculus Quake II, which itself is based on Quake II
-3.21. Yamagi Quake II is released under the terms of the GPL version 2. See the
-LICENSE file for further information.
+Built with 100% open source tools, tested with Cemu and on real hardware.
 
-## Documentation
+## Installing
 
-Before asking any question, read through the documentation! The current
-version can be found here: [doc/010_index.md](doc/010_index.md)
+Install the Quake 2 data files to your sdcard "quake2" folder, and the wuhb to "wiiu/apps":
 
-## Releases
+```
+sdcard
+| - quake2
+| | - baseq2
+| | | - pak0.pak
+| | | - <other files>
+| | - rogue (optional)
+| | | - pak0.pak
+| | | - <other files>
+| | - xatrix (optional)
+| | | - pak0.pak
+| | | - <other files>
+| - wiiu
+  | - apps
+    | - quake2.wuhb
+```
 
-The official releases (including Windows binaries) can be found at our
-homepage: https://www.yamagi.org/quake2  
-**Unsupported** preview builds for Windows can be found at
-https://deponie.yamagi.org/quake2/misc/
+## Building
+
+You need:
+
+- [devkitPro wiiu toolchain](https://github.com/devkitPro/wut)
+- (optional, for music playback) ogg libraries for PPC (from the devkiPro pacman)
+- [CafeGLSL](https://github.com/Exzap/CafeGLSL) with [PR #3](https://github.com/Exzap/CafeGLSL/pull/3)
+  or directly from the [fork](https://github.com/Crementif/CafeGLSL/tree/main)
+  to build the offline GLSL compiler, and installed to `${DEVKITPRO}/tools/bin/glslcompiler.elf`
+
+```sh
+mkdir build
+cd build
+${DEVKITPRO}/portlibs/wiiu/bin/powerpc-eabi-cmake -DCMAKE_BUILD_TYPE=Release ..
+make
+
+# package to wuhb format (not yet integrated to the cmake file)
+rm -rf content && \
+mkdir content && \
+mkdir content/shaders && \
+cp *.gsh content/shaders/ && \
+${DEVKITPRO}/tools/bin/wuhbtool quake2.rpx quake2.wuhb \
+  --name="Yamagi Quake 2" \
+  --short-name=YQuake2 \
+  --content=content \
+   --icon=../stuff/wiiu/image-icon.png \
+   --tv-image=../stuff/wiiu/image-tv.png \
+   --drc-image=../stuff/wiiu/image-drc.png
+```
+
+The resulting `quake2.wuhb` can be installed on the sd-card for use in the WiiU, or launched directly by Cemu.
+The only other data required is the quake2 data files on the sd-card.
+
+## Bugs
+
+- Switching mods crashes game once a game has been loaded
+  You can switch while the initial video is played and the demo levels have not yet been loaded
+
+### Cemu Bug
+
+There is a bug in the Cemu PPC recompiler (i think), that causes endian conversion for floats
+to fail, if you run into this you can compile with a define `__FLOAT_HACK__` (see in CMakeLists.txt),
+or run Cemu with `--force-interpreter`. This also does not affect real hardware.
+
+(Yes, i am preparing a bug report with a minimal repro)
+
+## Added CVars
+
+- **r_lightmaps_unfiltered, r_3D_unfiltered**
+
+    similar to r_videos_unfiltered and r_2D_unfiltered, but applied to lightmaps and all 3d content
+
+- **wiiu_debugmips**
+
+    replace all textures with a color representing their mip level. can only be set (reliably) before
+    startup because it does not reload textures
+
+- **wiiu_drc**
+
+    copy TV image to DRC (make game playable on WiiU gamepad), has small performance hit
+
+## TODO
+
+- exiting from ingame, exit via HOME button or console shutdown works
+- FBO (post effects), has partial implementation
+- multisampling, requires reimplementation of WUT gfx implementation
+- stencil & scissor (shadows?), requires reimplementation of WUT gfx implementation
+- some clear color stuff glClearColor
+- round particles, gl_PointCoord always zero, might be some broken state
+
+## (maybe interesting?) things for WiiU devs
+
+Some things in here that i have not yet seen in any other demo, so feel free to "steal".
+
+- Mip-Mapped textures (src/client/refresh/wiiu/gl3_image.c in WiiU_Upload32)
+
+  the generation of them is meh, but getting the offsets right was a pain (Cemu + dumping was a great help)
+
+- Copy rendered screen from TV to DRC (src/client/refresh/wiiu/gl3_sdl.c in WiiU_EndFrame)
+
+  using a VERY simple shader for downsampling (even with hardcoded resolution)

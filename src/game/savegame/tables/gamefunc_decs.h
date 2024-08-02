@@ -885,7 +885,11 @@ extern edict_t * CreateTargetChangeLevel ( char * map ) ;
 extern void ClientEndServerFrames ( void ) ;
 extern void Com_Printf ( const char * msg , ... ) ;
 extern void Sys_Error ( const char * error , ... ) ;
+#ifdef __WIIU__
+game_export_t * GetGameAPIStatic ( game_import_t * import ) ;
+#else
 extern game_export_t * GetGameAPI ( game_import_t * import ) ;
+#endif
 extern void ShutdownGame ( void ) ;
 extern void SetItemNames ( void ) ;
 extern void InitItems ( void ) ;

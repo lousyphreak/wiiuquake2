@@ -40,7 +40,9 @@
 // Switch of the thread local stuff. Breaks mingw under Windows.
 #define STBI_NO_THREAD_LOCALS
 // include implementation part of stb_image into this file
+#ifndef __WIIU__
 #define STB_IMAGE_IMPLEMENTATION
+#endif
 #include "stb_image.h"
 
 // include resize implementation

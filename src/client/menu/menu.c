@@ -721,8 +721,10 @@ InitMainMenu(void)
     Menu_AddItem(&s_main, (void *)&s_multiplayer);
     Menu_AddItem(&s_main, (void *)&s_options);
     Menu_AddItem(&s_main, (void *)&s_video);
+#ifndef __WIIU__
+    // WiiU does not support quitting (yet)
     Menu_AddItem(&s_main, (void *)&s_quit);
-
+#endif
     Menu_Center(&s_main);
 }
 

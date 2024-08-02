@@ -72,6 +72,11 @@ static menulist_s s_filter_list;
 static menuaction_s s_defaults_action;
 static menuaction_s s_apply_action;
 
+#ifdef __WIIU__
+static cvar_t *wiiu_drc;
+static menulist_s s_wiiu_drc_list;
+#endif
+
 // --------
 
 // gl1, gl3, gles3, gl4, vk, soft
@@ -298,6 +303,13 @@ ApplyChanges(void *unused)
 		restart = true;
 	}
 
+#ifdef __WIIU__
+	if (wiiu_drc->value != s_wiiu_drc_list.curvalue)
+	{
+		Cvar_SetValue("wiiu_drc", s_wiiu_drc_list.curvalue);
+	}
+#endif
+
 	if (gl3_colorlight && gl3_colorlight->value != s_gl3_colorlight_list.curvalue)
 	{
 		Cvar_SetValue("gl3_colorlight", s_gl3_colorlight_list.curvalue);
@@ -496,6 +508,11 @@ VID_MenuInit(void)
 		r_vsync = Cvar_Get("r_vsync", "1", CVAR_ARCHIVE);
 	}
 
+	if (!wiiu_drc)
+	{
+		wiiu_drc = Cvar_Get("wiiu_drc", "1", CVAR_ARCHIVE);
+	}
+
 	if (!gl_anisotropic)
 	{
 		gl_anisotropic = Cvar_Get("r_anisotropic", "0", CVAR_ARCHIVE);
@@ -690,6 +707,15 @@ VID_MenuInit(void)
 	s_vsync_list.itemnames = yesno_names;
 	s_vsync_list.curvalue = (r_vsync->value != 0);
 
+#ifdef __WIIU__
+	s_wiiu_drc_list.generic.type = MTYPE_SPINCONTROL;
+	s_wiiu_drc_list.generic.name = "DRC output";
+	s_wiiu_drc_list.generic.x = 0;
+	s_wiiu_drc_list.generic.y = (y += 10);
+	s_wiiu_drc_list.itemnames = yesno_names;
+	s_wiiu_drc_list.curvalue = (wiiu_drc->value != 0);
+#endif
+
 	s_af_list.generic.type = MTYPE_SPINCONTROL;
 	s_af_list.generic.name = "aniso filtering";
 	s_af_list.generic.x = 0;
@@ -821,6 +847,9 @@ VID_MenuInit(void)
 	{
 		Menu_AddItem(&s_opengl_menu, (void *)&s_filter_list);
 	}
+#ifdef __WIIU__
+	Menu_AddItem(&s_opengl_menu, (void *)&s_wiiu_drc_list);
+#endif
 	Menu_AddItem(&s_opengl_menu, (void *)&s_defaults_action);
 	Menu_AddItem(&s_opengl_menu, (void *)&s_apply_action);
 

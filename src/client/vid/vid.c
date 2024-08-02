@@ -381,6 +381,9 @@ VID_ShutdownRenderer(void)
 	ref_active = false;
 }
 
+Q2_DLL_EXPORTED refexport_t
+GetRefAPIWiiU(refimport_t imp);
+
 /*
  * Loads and initializes a renderer.
  */
@@ -390,9 +393,10 @@ VID_LoadRenderer(void)
 	refimport_t	ri;
 	GetRefAPI_t	GetRefAPI;
 
+#ifndef __WIIU__
 	char reflib_name[64] = {0};
 	char reflib_path[MAX_OSPATH] = {0};
-
+#endif
 	// If the refresher is already active we need
 	// to shut it down before loading a new one
 	VID_ShutdownRenderer();
@@ -400,10 +404,14 @@ VID_LoadRenderer(void)
 	// Log what we're doing.
 	Com_Printf("----- refresher initialization -----\n");
 
+#ifdef __WIIU__
+	char reflib_name[64] = "WiiU-GX2";
+	GetRefAPI = GetRefAPIWiiU;
+#else
+
 	snprintf(reflib_name, sizeof(reflib_name), "ref_%s.%s", vid_renderer->string, lib_ext);
 	VID_GetRendererLibPath(vid_renderer->string, reflib_path, sizeof(reflib_path));
 	Com_Printf("Loading library: %s\n", reflib_name);
-
 	// Check if the renderer libs exists.
 	if (!VID_HasRenderer(vid_renderer->string))
 	{
@@ -423,6 +431,7 @@ VID_LoadRenderer(void)
 
 		return false;
 	}
+#endif
 
 	// Fill in the struct exported to the renderer.
 	// FIXME: Do we really need all these?
@@ -582,7 +591,7 @@ VID_Init(void)
 	// Console variables
 	vid_gamma = Cvar_Get("vid_gamma", "1.0", CVAR_ARCHIVE);
 	vid_fullscreen = Cvar_Get("vid_fullscreen", "0", CVAR_ARCHIVE);
-	vid_renderer = Cvar_Get("vid_renderer", "gl3", CVAR_ARCHIVE);
+	vid_renderer = Cvar_Get("vid_renderer", "wiiu", CVAR_ARCHIVE);
 
 	// Commands
 	Cmd_AddCommand("vid_restart", VID_Restart_f);

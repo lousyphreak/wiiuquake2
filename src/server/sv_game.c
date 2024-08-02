@@ -375,6 +375,10 @@ SV_ShutdownGameProgs(void)
 	ge = NULL;
 }
 
+#ifdef __WIIU__
+game_export_t *GetGameAPIStatic(game_import_t *import);
+#endif
+
 /*
  * Init the game subsystem for a new map
  */
@@ -448,6 +452,9 @@ SV_InitGameProgs(void)
 	import.SetAreaPortalState = CM_SetAreaPortalState;
 	import.AreasConnected = CM_AreasConnected;
 
+#ifdef __WIIU__
+	ge = GetGameAPIStatic(&import);
+#else
 	ge = (game_export_t *)Sys_GetGameAPI(&import);
 
 	if (!ge)
@@ -460,7 +467,7 @@ SV_InitGameProgs(void)
 		Com_Error(ERR_DROP, "game is version %i, not %i", ge->apiversion,
 				GAME_API_VERSION);
 	}
-
+#endif
 	ge->Init();
 
 	Com_Printf("------------------------------------\n\n");

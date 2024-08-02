@@ -884,7 +884,11 @@
 {"ClientEndServerFrames", (byte *)ClientEndServerFrames},
 {"Com_Printf", (byte *)Com_Printf},
 {"Sys_Error", (byte *)Sys_Error},
+#ifdef __WIIU__
+{"GetGameAPI", (byte *)GetGameAPIStatic},
+#else
 {"GetGameAPI", (byte *)GetGameAPI},
+#endif
 {"ShutdownGame", (byte *)ShutdownGame},
 {"SetItemNames", (byte *)SetItemNames},
 {"InitItems", (byte *)InitItems},

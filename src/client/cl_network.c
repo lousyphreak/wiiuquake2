@@ -521,10 +521,12 @@ CL_PingServers_f(void)
 		adr.port = BigShort(PORT_SERVER);
 		Netchan_OutOfBandPrint(NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
 
+#ifndef __DISABLE_IPV6__
 		Com_Printf("pinging multicast...\n");
 		adr.type = NA_MULTICAST6;
 		adr.port = BigShort(PORT_SERVER);
 		Netchan_OutOfBandPrint(NS_CLIENT, adr, va("info %i", PROTOCOL_VERSION));
+#endif
 	}
 
 	noipx = Cvar_Get("noipx", "0", CVAR_NOSET);

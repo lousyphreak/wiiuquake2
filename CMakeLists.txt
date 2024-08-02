@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.1 FATAL_ERROR)
+cmake_minimum_required(VERSION 3.11 FATAL_ERROR)
 
 # Print a message that using the Makefiles is recommended.
 message(NOTICE: " The CMakeLists.txt is unmaintained. Use the Makefile if possible.")
@@ -46,6 +46,7 @@ else() # GCC/clang/mingw
 #  -fwrapv              -> Make signed integer overflows defined
 #  -fvisibility=hidden	-> Force defaultsymbol visibility to hidden
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wall -fno-strict-aliasing -fwrapv -fvisibility=hidden")
+#set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -D__FLOAT_HACK__")
 
 # Use -O2 as maximum optimization level. -O3 has it's problems with yquake2.
 string(REPLACE "-O3" "-O2" CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}")
@@ -189,11 +190,15 @@ else()
 	list(APPEND yquake2SDLLinkerFlags ${SDL2_LIBRARY})
 endif()
 
-# We need an OpenGL implementation.
-set(OpenGL_GL_PREFERENCE GLVND)
-find_package(OpenGL REQUIRED)
-list(APPEND yquake2IncludeDirectories ${OPENGL_INCLUDE_DIR})
-list(APPEND yquake2OpenGLLinkerFlags ${OPENGL_LIBRARIES})
+if(${CMAKE_SYSTEM_NAME} MATCHES "CafeOS")
+	add_definitions(-D__DISABLE_IPV6__)
+else()
+	# We need an OpenGL implementation.
+	set(OpenGL_GL_PREFERENCE GLVND)
+	find_package(OpenGL REQUIRED)
+	list(APPEND yquake2IncludeDirectories ${OPENGL_INCLUDE_DIR})
+	list(APPEND yquake2OpenGLLinkerFlags ${OPENGL_LIBRARIES})
+endif()
 
 # backtrace lookup
 # Some systems like Linux has it within the libc some like the BSD, Haiku ...
@@ -238,30 +243,32 @@ if(${OPENAL_SUPPORT})
 	endif()
 endif()
 
-# General linker flags.
-if(NOT MSVC)
-	list(APPEND yquake2LinkerFlags m)
-endif()
-list(APPEND yquake2LinkerFlags ${CMAKE_DL_LIBS})
-
-if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
-	if(!MSVC)
-		list(APPEND yquake2LinkerFlags "-static-libgcc")
+if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "CafeOS")
+	# General linker flags.
+	if(NOT MSVC)
+		list(APPEND yquake2LinkerFlags m)
 	endif()
-else()
-	if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Haiku")
-		list(APPEND yquake2LinkerFlags "-rdynamic")
+	list(APPEND yquake2LinkerFlags ${CMAKE_DL_LIBS})
+
+	if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
+		if(!MSVC)
+			list(APPEND yquake2LinkerFlags "-static-libgcc")
+		endif()
 	else()
-		list(APPEND yquake2LinkerFlags "-lnetwork")
-                set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+		if (NOT ${CMAKE_SYSTEM_NAME} MATCHES "Haiku")
+			list(APPEND yquake2LinkerFlags "-rdynamic")
+		else()
+			list(APPEND yquake2LinkerFlags "-lnetwork")
+					set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+		endif()
+		if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
+			list(APPEND yquake2LinkerFlags "-lsocket -lnsl")
+		endif()
 	endif()
-	if (${CMAKE_SYSTEM_NAME} MATCHES "SunOS")
-		list(APPEND yquake2LinkerFlags "-lsocket -lnsl")
-	endif()
-endif()
 
-if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD" AND NOT WIN32)
-	list(APPEND yquake2LinkerFlags "-Wl,--no-undefined")
+	if(NOT ${CMAKE_SYSTEM_NAME} MATCHES "Darwin" AND NOT ${CMAKE_SYSTEM_NAME} MATCHES "OpenBSD" AND NOT WIN32)
+		list(APPEND yquake2LinkerFlags "-Wl,--no-undefined")
+	endif()
 endif()
 
 # With all of those libraries and user defined paths
@@ -311,6 +318,13 @@ set(Backends-Windows-Source
 	${BACKENDS_SRC_DIR}/windows/shared/hunk.c
 	)
 
+set(Backends-WiiU-Source
+	${BACKENDS_SRC_DIR}/wiiu/main.c
+	${BACKENDS_SRC_DIR}/wiiu/network.c
+	${BACKENDS_SRC_DIR}/wiiu/system.c
+	${BACKENDS_SRC_DIR}/wiiu/shared/hunk.c
+	)
+
 set(Backends-Windows-Header
 	${BACKENDS_SRC_DIR}/windows/header/resource.h
 	)
@@ -323,10 +337,17 @@ set(REF-Unix-Source
 	${BACKENDS_SRC_DIR}/unix/shared/hunk.c
 	)
 
+set(REF-WiiU-Source
+	${BACKENDS_SRC_DIR}/wiiu/shared/hunk.c
+	)
+
 # Set the nessesary platform specific source
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 	set(Platform-Specific-Source ${Backends-Windows-Source} ${Backends-Windows-Header})
 	set(REF-Platform-Specific-Source ${REF-Windows-Source})
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "CafeOS")
+	set(Platform-Specific-Source ${Backends-WiiU-Source})
+	set(REF-Platform-Specific-Source ${REF-WiiU-Source})
 else()
 	set(Platform-Specific-Source ${Backends-Unix-Source})
 	set(REF-Platform-Specific-Source ${REF-Unix-Source})
@@ -700,6 +721,33 @@ set(SOFT-Header
 	${COMMON_SRC_DIR}/header/shared.h
 	)
 
+	
+set(WiiU-Source
+	${REF_SRC_DIR}/wiiu/wiiu_draw.c
+	${REF_SRC_DIR}/wiiu/wiiu_dynbuffers.c
+	${REF_SRC_DIR}/wiiu/wiiu_framebuffer.c
+	${REF_SRC_DIR}/wiiu/wiiu_image.c
+	${REF_SRC_DIR}/wiiu/wiiu_light.c
+	${REF_SRC_DIR}/wiiu/wiiu_lightmap.c
+	${REF_SRC_DIR}/wiiu/wiiu_main.c
+	${REF_SRC_DIR}/wiiu/wiiu_mesh.c
+	${REF_SRC_DIR}/wiiu/wiiu_misc.c
+	${REF_SRC_DIR}/wiiu/wiiu_model.c
+	${REF_SRC_DIR}/wiiu/wiiu_sdl.c
+	${REF_SRC_DIR}/wiiu/wiiu_state.c
+	${REF_SRC_DIR}/wiiu/wiiu_surf.c
+	${REF_SRC_DIR}/wiiu/wiiu_warp.c
+	${REF_SRC_DIR}/wiiu/wiiu_shaders.c
+	${REF_SRC_DIR}/files/models.c
+	${REF_SRC_DIR}/files/pcx.c
+	${REF_SRC_DIR}/files/stb.c
+	${REF_SRC_DIR}/files/surf.c
+	${REF_SRC_DIR}/files/wal.c
+	${REF_SRC_DIR}/files/pvs.c
+	${COMMON_SRC_DIR}/shared/shared.c
+	${COMMON_SRC_DIR}/md4.c
+	)
+
 # Main Quake 2 executable
 
 if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
@@ -727,6 +775,23 @@ if(${CMAKE_SYSTEM_NAME} MATCHES "Windows")
 		)
 	add_executable(quake2 WIN32 ${Wrapper-Source})
 	set_target_properties(quake2 PROPERTIES RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release)
+elseif(${CMAKE_SYSTEM_NAME} MATCHES "CafeOS")
+	add_executable(quake2 ${Client-Source} ${Client-SDL-Source} ${Client-Header}
+			${Platform-Specific-Source} ${Backends-Generic-Source} ${WiiU-Source} ${Game-Source} ${Game-Header})
+	set_target_properties(quake2 PROPERTIES
+			RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
+			)
+	target_link_libraries(quake2 ${yquake2LinkerFlags} ${yquake2ClientLinkerFlags}
+		${yquake2SDLLinkerFlags} ${yquake2ZLibLinkerFlags} ${SDL2_LIBRARIES})
+	if(SDL3_SUPPORT)
+		target_link_libraries(quake2 SDL3::SDL3)
+	endif()
+
+	include("src/client/refresh/wiiu/shader_compile.cmake")
+
+	if(${CMAKE_SYSTEM_NAME} MATCHES "CafeOS")
+		wut_create_rpx(quake2)
+	endif()
 else()
 	add_executable(quake2 ${Client-Source} ${Client-SDL-Source} ${Client-Header}
 			${Platform-Specific-Source} ${Backends-Generic-Source})
@@ -738,6 +803,26 @@ else()
 	if(SDL3_SUPPORT)
 		target_link_libraries(quake2 SDL3::SDL3)
 	endif()
+endif()
+
+if(${CMAKE_SYSTEM_NAME} MATCHES "CafeOS")
+	# # Build the GL3 dynamic library
+	# add_executable(ref_wiiu ${WiiU-Source} ${REF-Platform-Specific-Source})
+	# set_target_properties(ref_wiiu PROPERTIES
+	# 		PREFIX ""
+	# 		LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
+	# 		RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/release
+	# 		SUFFIX ${CMAKE_SHARED_LIBRARY_SUFFIX}
+	# 		)
+	# target_include_directories(ref_wiiu PRIVATE ${CMAKE_SOURCE_DIR}/src/client/refresh/gl3/glad/include)
+	# target_link_libraries(ref_wiiu ${yquake2LinkerFlags} ${yquake2SDLLinkerFlags})
+	# if(SDL3_SUPPORT)
+	# 	target_link_libraries(ref_wiiu SDL3::SDL3)
+	# endif()
+	# wut_create_rpl(ref_wiiu)
+
+	# No support for all the rest of the binaries so we exit here
+	return()
 endif()
 
 # Quake 2 Dedicated Server

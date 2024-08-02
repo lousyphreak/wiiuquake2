@@ -132,6 +132,8 @@ static void SetExecutablePath(char* exePath)
 		exePath[0] = '\0';
 	}
 
+#elif defined(__WIIU__)
+	snprintf(exePath, PATH_MAX, "/vol/external01/quake2");
 #else
 
 	// Several platforms (for example OpenBSD) donn't provide a

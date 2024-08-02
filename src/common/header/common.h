@@ -525,8 +525,10 @@ typedef enum
 	NA_IP,
 	NA_IPX,
 	NA_BROADCAST_IPX,
+#ifndef __DISABLE_IPV6__
 	NA_IP6,
 	NA_MULTICAST6
+#endif
 } netadrtype_t;
 
 typedef enum {NS_CLIENT, NS_SERVER} netsrc_t;

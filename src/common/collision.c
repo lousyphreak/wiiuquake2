@@ -126,6 +126,16 @@ int		c_traces, c_brush_traces;
 /* 1/32 epsilon to keep floating point happy */
 #define DIST_EPSILON (0.03125f)
 
+static inline void endianSwap2(float* dst, const float* src) {
+	uint8_t* dstP=(uint8_t*)dst;
+	uint8_t* srcP=(uint8_t*)src;
+
+	dstP[0] = srcP[3];
+	dstP[1] = srcP[2];
+	dstP[2] = srcP[1];
+	dstP[3] = srcP[0];
+}
+
 void
 FloodArea_r(carea_t *area, int floodnum)
 {
@@ -1213,9 +1223,17 @@ CMod_LoadSubmodels(lump_t *l)
 		for (j = 0; j < 3; j++)
 		{
 			/* spread the mins / maxs by a pixel */
+#ifdef __FLOAT_HACK__
+			endianSwap2(&out->mins[j], &in->mins[j]);
+			out->mins[j] -= 1;
+			endianSwap2(&out->maxs[j], &in->maxs[j]);
+			out->maxs[j] += 1;
+			endianSwap2(&out->origin[j], &in->origin[j]);
+#else
 			out->mins[j] = LittleFloat(in->mins[j]) - 1;
 			out->maxs[j] = LittleFloat(in->maxs[j]) + 1;
 			out->origin[j] = LittleFloat(in->origin[j]);
+#endif
 		}
 
 		out->headnode = LittleLong(in->headnode);
@@ -1443,7 +1461,11 @@ CMod_LoadPlanes(lump_t *l)
 
 		for (j = 0; j < 3; j++)
 		{
+#ifdef __FLOAT_HACK__
+			endianSwap2(&out->normal[j], &in->normal[j]);
+#else
 			out->normal[j] = LittleFloat(in->normal[j]);
+#endif
 
 			if (out->normal[j] < 0)
 			{
@@ -1451,7 +1473,11 @@ CMod_LoadPlanes(lump_t *l)
 			}
 		}
 
+#ifdef __FLOAT_HACK__
+		endianSwap2(&out->dist, &in->dist);
+#else
 		out->dist = LittleFloat(in->dist);
+#endif
 		out->type = LittleLong(in->type);
 		out->signbits = bits;
 	}

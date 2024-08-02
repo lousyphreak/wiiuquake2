@@ -25,7 +25,7 @@
  * =======================================================================
  */
 
-#ifndef _MSC_VER
+#if !defined(_MSC_VER) && !defined(__WIIU__)
 #include <libgen.h>
 #endif
 
@@ -1669,6 +1669,11 @@ static char* basename( char* n )
 		return (r2 == NULL || r1 > r2) ? (r1 + 1) : (r2 + 1);
 	return (r2 != NULL) ? (r2 + 1) : n;
 }
+#elif defined (__WIIU__)
+static char* basename( char* n )
+{
+	return "/content";
+}
 #endif // _MSC_VER
 
 void
@@ -1830,6 +1835,10 @@ void FS_BuildGenericSearchPath(void) {
 	// since it's buffersize is 1024 while most OS have
 	// a maximum path size of 4096...
 	char path[MAX_OSPATH];
+
+#ifdef __WIIU__
+	FS_AddDirToSearchPath("/vol/content/", false);
+#endif
 
 	fsRawPath_t *search = fs_rawPath;
 
@@ -2121,8 +2130,13 @@ FS_InitFilesystem(void)
 	}
 	else if (strlen(datadir) == 0)
 	{
+#ifdef __WIIU__
+		strcpy(datadir, "/vol/external01/quake2/");
+#else
 		strcpy(datadir, ".");
+#endif
 	}
+	Com_Printf("Using DataDir: %s\n", datadir);
 
 #ifdef _WIN32
 	// setup minizip for Unicode compatibility
