@@ -787,11 +787,20 @@ elseif(${CMAKE_SYSTEM_NAME} MATCHES "CafeOS")
 		target_link_libraries(quake2 SDL3::SDL3)
 	endif()
 
+	file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/release/")
+	file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/content/shaders/")
+
 	include("src/client/refresh/wiiu/shader_compile.cmake")
 
-	if(${CMAKE_SYSTEM_NAME} MATCHES "CafeOS")
-		wut_create_rpx(quake2)
-	endif()
+	wut_create_rpx(quake2)
+	wut_create_wuhb(quake2
+		CONTENT "${CMAKE_CURRENT_BINARY_DIR}/content/"
+		NAME "Yamagi Quake 2"
+		SHORTNAME "YQuake2"
+		ICON "stuff/wiiu/image-icon.png"
+		TVSPLASH "stuff/wiiu/image-tv.png"
+		DRCSPLASH "stuff/wiiu/image-drc.png"
+	)
 else()
 	add_executable(quake2 ${Client-Source} ${Client-SDL-Source} ${Client-Header}
 			${Platform-Specific-Source} ${Backends-Generic-Source})

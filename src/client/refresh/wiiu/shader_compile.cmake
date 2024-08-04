@@ -5,13 +5,13 @@ function(wut_compile_shaders vertexShader fragmentShader output)
         message(FATAL_ERROR "Could not find glslcompiler.elf: try installing wut-tools")
     endif()
 
-    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/${output}
-        COMMAND ${WUT_GLSLCOMPILER_EXE} -vs ${CMAKE_CURRENT_SOURCE_DIR}/${vertexShader} -ps ${CMAKE_CURRENT_SOURCE_DIR}/${fragmentShader} -o ${CMAKE_CURRENT_BINARY_DIR}/${output}
+    add_custom_command(OUTPUT ${CMAKE_CURRENT_BINARY_DIR}/content/shaders/${output}
+        COMMAND ${WUT_GLSLCOMPILER_EXE} -vs ${CMAKE_CURRENT_SOURCE_DIR}/${vertexShader} -ps ${CMAKE_CURRENT_SOURCE_DIR}/${fragmentShader} -o ${CMAKE_CURRENT_BINARY_DIR}/content/shaders/${output}
         DEPENDS ${vertexShader} ${fragmentShader} 
         COMMENT "Compiling GLSL VS: ${vertexShader} FS: ${fragmentShader} to ${output}"
         VERBATIM
     )
-    add_custom_target(shader-${output} ALL DEPENDS ${output})
+    add_custom_target(shader-${output} ALL DEPENDS content/shaders/${output})
 
     install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${output} DESTINATION shaders)
 

@@ -43,19 +43,6 @@ mkdir build
 cd build
 ${DEVKITPRO}/portlibs/wiiu/bin/powerpc-eabi-cmake -DCMAKE_BUILD_TYPE=Release ..
 make
-
-# package to wuhb format (not yet integrated to the cmake file)
-rm -rf content && \
-mkdir content && \
-mkdir content/shaders && \
-cp *.gsh content/shaders/ && \
-${DEVKITPRO}/tools/bin/wuhbtool quake2.rpx quake2.wuhb \
-  --name="Yamagi Quake 2" \
-  --short-name=YQuake2 \
-  --content=content \
-   --icon=../stuff/wiiu/image-icon.png \
-   --tv-image=../stuff/wiiu/image-tv.png \
-   --drc-image=../stuff/wiiu/image-drc.png
 ```
 
 The resulting `quake2.wuhb` can be installed on the sd-card for use in the WiiU, or launched directly by Cemu.
