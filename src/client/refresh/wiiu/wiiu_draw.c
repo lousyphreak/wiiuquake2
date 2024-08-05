@@ -78,8 +78,7 @@ drawTexturedRectangle(float x, float y, float w, float h,
 	ab[12] = x+w; ab[13] = y;   ab[14] = sh; ab[15] = tl;
 
 	//DCStoreRange(ab, abSize);
-    GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-		ab, abSize);
+    GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, ab, abSize);
 	GX2SetAttribBuffer(0, abSize, 4 * sizeof(float), ab);
     GX2DrawEx(GX2_PRIMITIVE_MODE_TRIANGLE_STRIP, 4, 0, 1);
 }
@@ -96,8 +95,7 @@ drawColoredRectangle(float x, float y, float w, float h)
 	ab[6] = x+w; ab[7] = y;
 
 	//DCStoreRange(ab, abSize);
-    GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-		ab, abSize);
+    GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, ab, abSize);
 	GX2SetAttribBuffer(0, abSize, 2 * sizeof(float), ab);
     GX2DrawEx(GX2_PRIMITIVE_MODE_TRIANGLE_STRIP, 4, 0, 1);
 }

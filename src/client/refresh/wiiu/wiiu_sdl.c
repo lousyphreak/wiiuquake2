@@ -103,8 +103,7 @@ void WiiU_EndFrame(void)
 			WiiU_UseProgram(&gl3state.siDrcCopy);
 			WiiU_Bind(tvTex);
 
-			GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-				verts, abSize);
+			GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, verts, abSize);
 			GX2SetAttribBuffer(0, abSize, 4 * sizeof(float), verts);
 
 			GX2DrawEx(GX2_PRIMITIVE_MODE_TRIANGLE_STRIP, 4, 0, 1);

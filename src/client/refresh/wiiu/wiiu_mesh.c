@@ -493,15 +493,13 @@ DrawAliasShadow(gl3_shadowinfo_t* shadowInfo)
 	void* ab = WiiU_ABAlloc(abSize);
 	memcpy(ab, vtxBuf.p, abSize);
 	//DCStoreRange(ab, abSize);
-    GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-		ab, abSize);
+    GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, ab, abSize);
 
 	uint32_t ibSize = da_count(idxBuf)*sizeof(uint16_t);
 	void* ib = WiiU_IBAlloc(ibSize);
 	memcpy(ib, idxBuf.p, ibSize);
 	//DCStoreRange(ib, ibSize);
-    GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-		ib, ibSize);
+    GX2Invalidate(GX2_INVALIDATE_MODE_CPU, ib, ibSize);
 
 	GX2SetAttribBuffer(0, abSize, sizeof(gl3_alias_vtx_t), ab);
 	GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, da_count(idxBuf), GX2_INDEX_TYPE_U16, ib, 0, 1);

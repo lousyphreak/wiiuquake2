@@ -565,8 +565,7 @@ WiiU_BufferAndDraw3D(const gl3_3D_vtx_t* verts, int numVerts, int drawMode)
 	memcpy(ab, verts, abSize);
 
 	//DCStoreRange(ab, abSize);
-    GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-		ab, abSize);
+    GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, ab, abSize);
 	GX2SetAttribBuffer(0, abSize, one, ab);
     GX2DrawEx(drawMode, numVerts, 0, 1);
 }
@@ -833,8 +832,7 @@ WiiU_DrawParticles(void)
 			cur->color[3] = p->alpha;
 		}
 
-		GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-			particleBuffer, abSize);
+		GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, particleBuffer, abSize);
 		GX2SetAttribBuffer(0, abSize, sizeof(part_vtx), particleBuffer);
 		GX2DrawEx(GX2_PRIMITIVE_MODE_POINTS, numParticles, 0, 1);
 
