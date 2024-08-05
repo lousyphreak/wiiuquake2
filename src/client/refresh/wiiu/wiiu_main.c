@@ -34,9 +34,6 @@ refimport_t ri;
 #define HANDMADE_MATH_IMPLEMENTATION
 #include "header/HandmadeMath.h"
 
-#define DG_DYNARR_IMPLEMENTATION
-#include "header/DG_dynarr.h"
-
 #define REF_VERSION "Yamagi Quake II WiiU Refresher"
 
 

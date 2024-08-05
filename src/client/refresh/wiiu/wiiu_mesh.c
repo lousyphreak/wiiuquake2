@@ -26,11 +26,13 @@
  */
 
 #include "header/local.h"
-
-#include "header/DG_dynarr.h"
+#include <malloc.h>
 
 #define NUMVERTEXNORMALS 162
 #define SHADEDOT_QUANT 16
+// __WIIU_TODO__ preallocate this many verts/indexes on first encounter of a mesh
+#define VERT_ALLOC_BASE (2048*1)
+#define IDX_ALLOC_BASE (VERT_ALLOC_BASE*3)
 
 static float r_avertexnormals[NUMVERTEXNORMALS][3] = {
 #include "../constants/anorms.h"
@@ -52,27 +54,10 @@ typedef struct gl3_shadowinfo_s {
 	entity_t* entity;
 } gl3_shadowinfo_t;
 
-DA_TYPEDEF(gl3_shadowinfo_t, ShadowInfoArray_t);
-// collect all models casting shadows (each frame)
-// to draw shadows last
-static ShadowInfoArray_t shadowModels = {0};
-
-DA_TYPEDEF(gl3_alias_vtx_t, AliasVtxArray_t);
-DA_TYPEDEF(uint16_t, UShortArray_t);
-// dynamic arrays to batch all the data of a model, so we can render a model in one draw call
-static AliasVtxArray_t vtxBuf = {0};
-static UShortArray_t idxBuf = {0};
-
-#include <malloc.h>
-
 
 void
 WiiU_ShutdownMeshes(void)
 {
-	da_free(vtxBuf);
-	da_free(idxBuf);
-
-	da_free(shadowModels);
 }
 
 static void
@@ -200,14 +185,16 @@ DrawAliasFrameLerp(dmdl_t *paliashdr, entity_t* entity, vec3_t shadelight)
 	// this way there's only one draw call (and two glBufferData() calls)
 	// instead of (at least) dozens. *greatly* improves performance.
 
-	// so first clear out the data from last call to this function
-	// (the buffers are static global so we don't have malloc()/free() for each rendered model)
-	da_clear(vtxBuf);
-	da_clear(idxBuf);
+	uint16_t allocatedVerts = entity->model->cachedNumVerts > 0 ? entity->model->cachedNumVerts : VERT_ALLOC_BASE;
+	uint16_t allocatedIdxs = entity->model->cachedNumIdxs > 0 ? entity->model->cachedNumIdxs : IDX_ALLOC_BASE;
+	int totalVerts = 0;
+	gl3_alias_vtx_t* vtxBuf = (gl3_alias_vtx_t*)WiiU_ABAlloc(allocatedVerts * sizeof(gl3_alias_vtx_t));
+	int totalIdx = 0;
+	uint16_t* idxBuf = (uint16_t*)WiiU_IBAlloc(allocatedIdxs * sizeof(uint16_t));
 
 	while (1)
 	{
-		uint16_t nextVtxIdx = da_count(vtxBuf);
+		uint16_t nextVtxIdx = totalVerts;
 
 		/* get the vertex count and primitive type */
 		count = *order++;
@@ -228,7 +215,8 @@ DrawAliasFrameLerp(dmdl_t *paliashdr, entity_t* entity, vec3_t shadelight)
 			type = GX2_PRIMITIVE_MODE_TRIANGLE_STRIP;
 		}
 
-		gl3_alias_vtx_t* buf = da_addn_uninit(vtxBuf, count);
+		gl3_alias_vtx_t* buf = &vtxBuf[totalVerts];
+		totalVerts += count;
 
 		if (colorOnly)
 		{
@@ -283,7 +271,8 @@ DrawAliasFrameLerp(dmdl_t *paliashdr, entity_t* entity, vec3_t shadelight)
 			uint16_t i;
 			for(i=1; i < count-1; ++i)
 			{
-				uint16_t* add = da_addn_uninit(idxBuf, 3);
+				uint16_t* add = &idxBuf[totalIdx];
+				totalIdx += 3;
 
 				add[0] = nextVtxIdx;
 				add[1] = nextVtxIdx+i;
@@ -297,7 +286,8 @@ DrawAliasFrameLerp(dmdl_t *paliashdr, entity_t* entity, vec3_t shadelight)
 			{
 				// add two triangles at once, because the vertex order is different
 				// for odd vs even triangles
-				uint16_t* add = da_addn_uninit(idxBuf, 6);
+				uint16_t* add = &idxBuf[totalIdx];
+				totalIdx += 6;
 
 				add[0] = nextVtxIdx + i-1;
 				add[1] = nextVtxIdx + i;
@@ -310,7 +300,8 @@ DrawAliasFrameLerp(dmdl_t *paliashdr, entity_t* entity, vec3_t shadelight)
 			// add remaining triangle, if any
 			if(i < count-1)
 			{
-				uint16_t* add = da_addn_uninit(idxBuf, 3);
+				uint16_t* add = &idxBuf[totalIdx];
+				totalIdx += 3;
 
 				add[0] = nextVtxIdx + i-1;
 				add[1] = nextVtxIdx + i;
@@ -318,28 +309,30 @@ DrawAliasFrameLerp(dmdl_t *paliashdr, entity_t* entity, vec3_t shadelight)
 			}
 		}
 	}
+	if(entity->model->cachedNumVerts < 1)
+		entity->model->cachedNumVerts = totalVerts;
+	if(entity->model->cachedNumIdxs < 1)
+		entity->model->cachedNumIdxs = totalIdx;
 
-	uint32_t abSize = da_count(vtxBuf)*sizeof(gl3_alias_vtx_t);
-	void* ab = WiiU_ABAlloc(abSize);
-	memcpy(ab, vtxBuf.p, abSize);
-	//DCStoreRange(ab, abSize);
-    GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-		ab, abSize);
+	//WHBLogWritef("");
+	uint32_t vtxSize = totalVerts * sizeof(gl3_alias_vtx_t);
+    GX2Invalidate(GX2_INVALIDATE_MODE_CPU_ATTRIBUTE_BUFFER, vtxBuf, vtxSize);
+	GX2SetAttribBuffer(0, vtxSize, sizeof(gl3_alias_vtx_t), vtxBuf);
 
-	uint32_t ibSize = da_count(idxBuf)*sizeof(uint16_t);
-	void* ib = WiiU_IBAlloc(ibSize);
-	memcpy(ib, idxBuf.p, ibSize);
-	//DCStoreRange(ib, ibSize);
-    GX2Invalidate(GX2_INVALIDATE_MODE_ATTRIBUTE_BUFFER | GX2_INVALIDATE_MODE_CPU,
-		ib, ibSize);
+	uint32_t idxSize = totalIdx * sizeof(u_int16_t);
+    GX2Invalidate(GX2_INVALIDATE_MODE_CPU, idxBuf, idxSize);
 
-	GX2SetAttribBuffer(0, abSize, sizeof(gl3_alias_vtx_t), ab);
-	GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, da_count(idxBuf), GX2_INDEX_TYPE_U16, ib, 0, 1);
+	GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, totalIdx, GX2_INDEX_TYPE_U16, idxBuf, 0, 1);
+
+	if(totalVerts > allocatedVerts || totalIdx > allocatedIdxs)
+		WHBLogWritef("mdl %s, %d/%d verts, %d/%d idx\n", entity->model->name, totalVerts, allocatedVerts, totalIdx, allocatedIdxs, entity->model->numvertexes);
 }
 
+#ifdef __WIIU_TODO__
 static void
 DrawAliasShadow(gl3_shadowinfo_t* shadowInfo)
 {
+	WHBLogWritef("DrawAliasShadow\n");
 	int type;
 	int *order;
 	vec3_t point;
@@ -504,6 +497,7 @@ DrawAliasShadow(gl3_shadowinfo_t* shadowInfo)
 	GX2SetAttribBuffer(0, abSize, sizeof(gl3_alias_vtx_t), ab);
 	GX2DrawIndexedEx(GX2_PRIMITIVE_MODE_TRIANGLES, da_count(idxBuf), GX2_INDEX_TYPE_U16, ib, 0, 1);
 }
+#endif
 
 static qboolean
 CullAliasModel(vec3_t bbox[8], entity_t *e)
@@ -953,6 +947,7 @@ WiiU_DrawAliasModel(entity_t *entity)
 		WiiU_SetDepthRange(gl3depthmin, gl3depthmax);
 	}
 
+#ifdef __WIIU_TODO__
 	if (gl_shadows->value && gl3config.stencil && !(entity->flags & (RF_TRANSLUCENT | RF_WEAPONMODEL | RF_NOSHADOW)))
 	{
 		gl3_shadowinfo_t si = {0};
@@ -963,15 +958,16 @@ WiiU_DrawAliasModel(entity_t *entity)
 
 		da_push(shadowModels, si);
 	}
+#endif
 }
 
 void WiiU_ResetShadowAliasModels(void)
 {
-	da_clear(shadowModels);
 }
 
 void WiiU_DrawAliasShadows(void)
 {
+#ifdef __WIIU_TODO__
 	size_t numShadowModels = da_count(shadowModels);
 	if(numShadowModels == 0)
 	{
@@ -1021,5 +1017,6 @@ void WiiU_DrawAliasShadows(void)
 	//glPopMatrix();
 	gl3state.uni3DData.transModelMat4 = oldMat;
 	WiiU_UpdateUBO3D();
+#endif
 }
 

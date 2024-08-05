@@ -158,6 +158,9 @@ typedef struct model_s
 
 	// submodules
 	vec3_t		origin;	// for sounds or lights
+
+	int cachedNumVerts;
+	int cachedNumIdxs;
 } gl3model_t;
 
 #endif /* SRC_CLIENT_REFRESH_WiiU_HEADER_MODEL_H_ */
