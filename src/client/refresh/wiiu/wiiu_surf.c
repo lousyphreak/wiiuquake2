@@ -645,9 +645,36 @@ RecursiveWorldNode(entity_t *currententity, mnode_t *node)
 	RecursiveWorldNode(currententity, node->children[!side]);
 }
 
+uint64_t *renderTimes;
+int renderCounter;
+
 void
 WiiU_DrawWorld(void)
 {
+	renderCounter = (renderCounter + 2) & 0x2;
+	uint64_t *renderBegin = &renderTimes[renderCounter + 0];
+	uint64_t *renderEnd = &renderTimes[renderCounter + 1];
+
+	if(renderTimes == NULL)
+	{
+		renderTimes = malloc(sizeof(uint64_t) * 4);
+		renderCounter = 0;
+		renderBegin = &renderTimes[renderCounter + 0];
+		renderEnd = &renderTimes[renderCounter + 1];
+	}
+	else
+	{
+		if(*renderBegin == GX2_INVALID_COUNTER_VALUE_U64 || *renderEnd == GX2_INVALID_COUNTER_VALUE_U64)
+		{
+			R_Printf(PRINT_DEVELOPER, "DrawWorld: NO DATA\n");
+		}
+		else
+		{
+			float renderTimeUs = (*renderEnd - *renderBegin) / 27.0;
+			R_Printf(PRINT_DEVELOPER, "DrawWorld: %fus\n", renderTimeUs);
+		}
+	}
+
 	entity_t ent;
 
 	if (!r_drawworld->value)
@@ -669,8 +696,10 @@ WiiU_DrawWorld(void)
 	//gl3state.currenttexture = -1;
 
 	WiiU_ClearSkyBox();
+	GX2SampleBottomGPUCycle(renderBegin);
 	RecursiveWorldNode(&ent, gl3_worldmodel->nodes);
 	DrawTextureChains(&ent);
+	GX2SampleBottomGPUCycle(renderEnd);
 	WiiU_DrawSkyBox();
 	DrawTriangleOutlines();
 }

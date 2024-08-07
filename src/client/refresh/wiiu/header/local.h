@@ -527,5 +527,8 @@ extern cvar_t *wiiu_debugmips;
 extern cvar_t *wiiu_drc;
 extern cvar_t *wiiu_lightcap;
 
+#define GX2_INVALID_COUNTER_VALUE_U64 -1
+extern void GX2SampleBottomGPUCycle(uint64_t *addr);
+
 
 #endif /* SRC_CLIENT_REFRESH_WiiU_HEADER_LOCAL_H_ */
