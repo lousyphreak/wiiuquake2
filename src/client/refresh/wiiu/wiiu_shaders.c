@@ -454,26 +454,23 @@ extern int LongSwap(int l);
 void WiiU_UpdateUBOLights(void)
 {
 	float* ub = (float*)WiiU_UBAlloc(sizeof(gl3state.uniLightsData));
+	memset(ub, 0, sizeof(gl3state.uniLightsData));
 
-	for(int i=0;i<MAX_DLIGHTS;++i)
+	for(int i=0;i<gl3_newrefdef.num_dlights;++i)
 	{
-		endianSwap2(&ub[i*sizeof(gl3UniDynLight)] + 0, &gl3state.uniLightsData.dynLights[i].origin[0]);
-		endianSwap2(&ub[i*sizeof(gl3UniDynLight)] + 1, &gl3state.uniLightsData.dynLights[i].origin[1]);
-		endianSwap2(&ub[i*sizeof(gl3UniDynLight)] + 2, &gl3state.uniLightsData.dynLights[i].origin[2]);
-		endianSwap2(&ub[i*sizeof(gl3UniDynLight)] + 4, &gl3state.uniLightsData.dynLights[i].color[0]);
-		endianSwap2(&ub[i*sizeof(gl3UniDynLight)] + 5, &gl3state.uniLightsData.dynLights[i].color[1]);
-		endianSwap2(&ub[i*sizeof(gl3UniDynLight)] + 6, &gl3state.uniLightsData.dynLights[i].color[2]);
-		if(i >= gl3state.uniLightsData.numDynLights)
-			ub[i*sizeof(gl3UniDynLight) + 7] = 0;
-		else
-			endianSwap2(&ub[i*sizeof(gl3UniDynLight)] + 7, &gl3state.uniLightsData.dynLights[i].intensity);
+		endianSwap2(&ub[i*sizeof(gl3UniDynLight)/sizeof(float)] + 0, &gl3state.uniLightsData.dynLights[i].origin[0]);
+		endianSwap2(&ub[i*sizeof(gl3UniDynLight)/sizeof(float)] + 1, &gl3state.uniLightsData.dynLights[i].origin[1]);
+		endianSwap2(&ub[i*sizeof(gl3UniDynLight)/sizeof(float)] + 2, &gl3state.uniLightsData.dynLights[i].origin[2]);
+		endianSwap2(&ub[i*sizeof(gl3UniDynLight)/sizeof(float)] + 4, &gl3state.uniLightsData.dynLights[i].color[0]);
+		endianSwap2(&ub[i*sizeof(gl3UniDynLight)/sizeof(float)] + 5, &gl3state.uniLightsData.dynLights[i].color[1]);
+		endianSwap2(&ub[i*sizeof(gl3UniDynLight)/sizeof(float)] + 6, &gl3state.uniLightsData.dynLights[i].color[2]);
+		endianSwap2(&ub[i*sizeof(gl3UniDynLight)/sizeof(float)] + 7, &gl3state.uniLightsData.dynLights[i].intensity);
 	}
-	((uint32_t*)ub)[MAX_DLIGHTS*sizeof(gl3UniDynLight)] = LongSwap(gl3state.uniLightsData.numDynLights);
 
 	// 3 --> uniLights --> PS:2
     GX2Invalidate(GX2_INVALIDATE_MODE_UNIFORM_BLOCK | GX2_INVALIDATE_MODE_CPU,
-		ub, 0x500);
-	GX2SetPixelUniformBlock(2, 0x500, ub);
+		ub, sizeof(gl3state.uniLightsData));
+	GX2SetPixelUniformBlock(2, sizeof(gl3state.uniLightsData), ub);
 }
 
 void WiiU_UpdateUBOLMScales(hmm_vec4 lmScales[MAX_LIGHTMAPS_PER_SURFACE])
