@@ -214,13 +214,13 @@ RenderBrushPoly(entity_t *currententity, msurface_t *fa)
 
 	if (fa->texinfo->flags & SURF_FLOWING)
 	{
-		WiiU_UseProgram(&gl3state.si3DlmFlow);
+		WiiU_UseLMFlowShader();
 		WiiU_UpdateUBOLMScales(lmScales);
 		WiiU_DrawGLFlowingPoly(fa);
 	}
 	else
 	{
-		WiiU_UseProgram(&gl3state.si3Dlm);
+		WiiU_UseLMShader();
 		WiiU_UpdateUBOLMScales(lmScales);
 		WiiU_DrawGLPoly(fa);
 	}
@@ -352,13 +352,13 @@ RenderLightmappedPoly(entity_t *currententity, msurface_t *surf)
 
 	if (surf->texinfo->flags & SURF_FLOWING)
 	{
-		WiiU_UseProgram(&gl3state.si3DlmFlow);
+		WiiU_UseLMFlowShader();
 		WiiU_UpdateUBOLMScales(lmScales);
 		WiiU_DrawGLFlowingPoly(surf);
 	}
 	else
 	{
-		WiiU_UseProgram(&gl3state.si3Dlm);
+		WiiU_UseLMShader();
 		WiiU_UpdateUBOLMScales(lmScales);
 		WiiU_DrawGLPoly(surf);
 	}

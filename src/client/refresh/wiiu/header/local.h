@@ -154,8 +154,6 @@ typedef struct
 typedef struct
 {
 	gl3UniDynLight dynLights[MAX_DLIGHTS];
-	uint32_t numDynLights;
-	float _padding[3];
 } gl3UniLights_t;
 
 enum {
@@ -194,12 +192,26 @@ typedef struct
 	gl3ShaderInfo_t si2DpostProcess; // shader to render postprocess FBO, when *not* underwater
 	gl3ShaderInfo_t si2DpostProcessWater; // shader to apply water-warp postprocess effect
 
+	// lightmap shader separated by number of lights
 	gl3ShaderInfo_t si3Dlm;        // a regular opaque face (e.g. from brush) with lightmap
+	gl3ShaderInfo_t si3Dlm0;        // a regular opaque face (e.g. from brush) with lightmap
+	gl3ShaderInfo_t si3Dlm1;        // a regular opaque face (e.g. from brush) with lightmap
+	gl3ShaderInfo_t si3Dlm2;        // a regular opaque face (e.g. from brush) with lightmap
+	gl3ShaderInfo_t si3Dlm4;        // a regular opaque face (e.g. from brush) with lightmap
+	gl3ShaderInfo_t si3Dlm8;        // a regular opaque face (e.g. from brush) with lightmap
+	gl3ShaderInfo_t si3Dlm16;        // a regular opaque face (e.g. from brush) with lightmap
+
 	// TODO: lm-only variants for gl_lightmap 1
 	gl3ShaderInfo_t si3Dtrans;     // transparent is always w/o lightmap
 	gl3ShaderInfo_t si3DcolorOnly; // used for beams - no lightmaps
 	gl3ShaderInfo_t si3Dturb;      // for water etc - always without lightmap
 	gl3ShaderInfo_t si3DlmFlow;    // for flowing/scrolling things with lightmap (conveyor, ..?)
+	gl3ShaderInfo_t si3DlmFlow0;    // for flowing/scrolling things with lightmap (conveyor, ..?)
+	gl3ShaderInfo_t si3DlmFlow1;    // for flowing/scrolling things with lightmap (conveyor, ..?)
+	gl3ShaderInfo_t si3DlmFlow2;    // for flowing/scrolling things with lightmap (conveyor, ..?)
+	gl3ShaderInfo_t si3DlmFlow4;    // for flowing/scrolling things with lightmap (conveyor, ..?)
+	gl3ShaderInfo_t si3DlmFlow8;    // for flowing/scrolling things with lightmap (conveyor, ..?)
+	gl3ShaderInfo_t si3DlmFlow16;    // for flowing/scrolling things with lightmap (conveyor, ..?)
 	gl3ShaderInfo_t si3DtransFlow; // for transparent flowing/scrolling things (=> no lightmap)
 	gl3ShaderInfo_t si3Dsky;       // guess what..
 	gl3ShaderInfo_t si3Dsprite;    // for sprites
@@ -380,6 +392,8 @@ extern qboolean WiiU_ImageHasFreeSpace(void);
 extern void WiiU_ImageList_f(void);
 
 // gl3_light.c
+extern void WiiU_UseLMShader();
+extern void WiiU_UseLMFlowShader();
 extern int r_dlightframecount;
 extern void WiiU_MarkSurfaceLights(dlight_t *light, int bit, mnode_t *node,
 	int r_dlightframecount);

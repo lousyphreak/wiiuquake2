@@ -226,12 +226,72 @@ static qboolean createShaders(void)
 		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for blending 3D lightmaps rendering!\n");
 		return false;
 	}
+	if(!initShader3D(&gl3state.si3Dlm0, "3d_lm_0"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for blending 3D lightmaps rendering!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3Dlm1, "3d_lm_1"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for blending 3D lightmaps rendering!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3Dlm2, "3d_lm_2"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for blending 3D lightmaps rendering!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3Dlm4, "3d_lm_4"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for blending 3D lightmaps rendering!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3Dlm8, "3d_lm_8"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for blending 3D lightmaps rendering!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3Dlm16, "3d_lm_16"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for blending 3D lightmaps rendering!\n");
+		return false;
+	}
 	if(!initShader3D(&gl3state.si3Dturb, "3d_water"))
 	{
 		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for water rendering!\n");
 		return false;
 	}
 	if(!initShader3D(&gl3state.si3DlmFlow, "3d_lm_flow"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for scrolling textured 3D rendering with lightmap!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3DlmFlow0, "3d_lm_flow_0"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for scrolling textured 3D rendering with lightmap!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3DlmFlow1, "3d_lm_flow_1"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for scrolling textured 3D rendering with lightmap!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3DlmFlow2, "3d_lm_flow_2"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for scrolling textured 3D rendering with lightmap!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3DlmFlow4, "3d_lm_flow_4"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for scrolling textured 3D rendering with lightmap!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3DlmFlow8, "3d_lm_flow_8"))
+	{
+		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for scrolling textured 3D rendering with lightmap!\n");
+		return false;
+	}
+	if(!initShader3D(&gl3state.si3DlmFlow16, "3d_lm_flow_16"))
 	{
 		R_Printf(PRINT_ALL, "WARNING: Failed to create shader program for scrolling textured 3D rendering with lightmap!\n");
 		return false;
@@ -305,10 +365,22 @@ static void deleteShaders(void)
 	WHBGfxFreeShaderGroup(&gl3state.si2D.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si2Dcolor.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si3Dlm.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3Dlm0.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3Dlm1.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3Dlm2.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3Dlm4.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3Dlm8.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3Dlm16.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si3Dtrans.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si3DcolorOnly.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si3Dturb.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si3DlmFlow.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3DlmFlow0.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3DlmFlow1.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3DlmFlow2.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3DlmFlow4.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3DlmFlow8.shaderGroup);
+	WHBGfxFreeShaderGroup(&gl3state.si3DlmFlow16.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si3DtransFlow.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si3Dsky.shaderGroup);
 	WHBGfxFreeShaderGroup(&gl3state.si3Dsprite.shaderGroup);

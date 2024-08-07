@@ -30,10 +30,7 @@ layout (std140) uniform uni3D
 };
 
 struct DynLight { // gl3UniDynLight in C
-    vec3 lightOrigin;
-    float _pad;
-    //vec3 lightColor;
-    //float lightIntensity;
+    vec4 lightOrigin;
     vec4 lightColor; // .a is intensity; this way it also works on OSX...
     // (otherwise lightIntensity always contained 1 there)
 };

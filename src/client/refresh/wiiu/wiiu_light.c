@@ -34,6 +34,70 @@ static vec3_t pointcolor;
 static cplane_t *lightplane; /* used as shadow plane */
 vec3_t lightspot;
 
+void WiiU_UseLMShader()
+{
+	if(gl3_newrefdef.num_dlights>16)
+	{
+		WiiU_UseProgram(&gl3state.si3Dlm);
+	}
+	else if(gl3_newrefdef.num_dlights>8)
+	{
+		WiiU_UseProgram(&gl3state.si3Dlm16);
+	}
+	else if(gl3_newrefdef.num_dlights>4)
+	{
+		WiiU_UseProgram(&gl3state.si3Dlm8);
+	}
+	else if(gl3_newrefdef.num_dlights>2)
+	{
+		WiiU_UseProgram(&gl3state.si3Dlm4);
+	}
+	else if(gl3_newrefdef.num_dlights>1)
+	{
+		WiiU_UseProgram(&gl3state.si3Dlm2);
+	}
+	else if(gl3_newrefdef.num_dlights>0)
+	{
+		WiiU_UseProgram(&gl3state.si3Dlm1);
+	}
+	else
+	{
+		WiiU_UseProgram(&gl3state.si3Dlm0);
+	}
+}
+
+void WiiU_UseLMFlowShader()
+{
+	if(gl3_newrefdef.num_dlights>16)
+	{
+		WiiU_UseProgram(&gl3state.si3DlmFlow);
+	}
+	else if(gl3_newrefdef.num_dlights>8)
+	{
+		WiiU_UseProgram(&gl3state.si3DlmFlow16);
+	}
+	else if(gl3_newrefdef.num_dlights>4)
+	{
+		WiiU_UseProgram(&gl3state.si3DlmFlow8);
+	}
+	else if(gl3_newrefdef.num_dlights>2)
+	{
+		WiiU_UseProgram(&gl3state.si3DlmFlow4);
+	}
+	else if(gl3_newrefdef.num_dlights>1)
+	{
+		WiiU_UseProgram(&gl3state.si3DlmFlow2);
+	}
+	else if(gl3_newrefdef.num_dlights>0)
+	{
+		WiiU_UseProgram(&gl3state.si3DlmFlow1);
+	}
+	else
+	{
+		WiiU_UseProgram(&gl3state.si3DlmFlow0);
+	}
+}
+
 void
 WiiU_MarkSurfaceLights(dlight_t *light, int bit, mnode_t *node, int r_dlightframecount)
 {
@@ -84,8 +148,6 @@ WiiU_PushDlights(void)
 	r_dlightframecount = gl3_framecount + 1;
 
 	l = gl3_newrefdef.dlights;
-
-	gl3state.uniLightsData.numDynLights = gl3_newrefdef.num_dlights;
 
 	for (i = 0; i < gl3_newrefdef.num_dlights; i++, l++)
 	{

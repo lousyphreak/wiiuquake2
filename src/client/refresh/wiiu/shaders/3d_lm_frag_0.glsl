@@ -72,35 +72,6 @@ void main()
     lmTex     += texture(lightmap2, passLMcoord);// * lmScales[2];
     lmTex     += texture(lightmap3, passLMcoord);// * lmScales[3];
 
-    for(uint i=0u; i<32; ++i)
-    {
-        // I made the following up, it's probably not too cool..
-        // it basically checks if the light is on the right side of the surface
-        // and, if it is, sets intensity according to distance between light and pixel on surface
-
-        // dyn light number i does not affect this plane, just skip it
-        //if((passLightFlags & (1u << i)) == 0u)  continue;
-
-        float intens = dynLights[i].lightColor.a;
-        //if(intens < 0.1)  continue;
-
-        vec3 lightToPos = dynLights[i].lightOrigin.xyz - passWorldCoord;
-        float distLightToPos = length(lightToPos);
-        float fact = max(0.0, intens - distLightToPos - 52.0);
-
-        // move the light source a bit further above the surface
-        // => helps if the lightsource is so close to the surface (e.g. grenades, rockets)
-        //    that the dot product below would return 0
-        // (light sources that are below the surface are filtered out by lightFlags)
-        lightToPos += passNormal*32.0;
-
-        // also factor in angle between light and point on surface
-        fact *= max(0.0, dot(passNormal, normalize(lightToPos)));
-
-
-        lmTex.rgb += dynLights[i].lightColor.rgb * fact * (1.0/256.0);
-    }
-
     lmTex.rgb *= overbrightbits;
     outColor = lmTex*texel;
     outColor.rgb = pow(outColor.rgb, vec3(gamma)); // apply gamma correction to result

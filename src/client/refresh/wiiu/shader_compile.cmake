@@ -36,6 +36,30 @@ wut_compile_shaders(
     src/client/refresh/wiiu/shaders/3d_lm_vert.glsl
     src/client/refresh/wiiu/shaders/3d_lm_frag.glsl
     3d_lm.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_0.glsl
+    3d_lm_0.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_1.glsl
+    3d_lm_1.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_2.glsl
+    3d_lm_2.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_4.glsl
+    3d_lm_4.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_8.glsl
+    3d_lm_8.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_16.glsl
+    3d_lm_16.gsh)
 # wut_compile_shaders(
 # 	src/client/refresh/wiiu/shaders/3d_lm_vert.glsl
 # 	src/client/refresh/wiiu/shaders/3d_lm_no_color_frag.glsl
@@ -56,6 +80,30 @@ wut_compile_shaders(
     src/client/refresh/wiiu/shaders/3d_lm_flow_vert.glsl
     src/client/refresh/wiiu/shaders/3d_lm_frag.glsl
     3d_lm_flow.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_flow_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_0.glsl
+    3d_lm_flow_0.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_flow_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_1.glsl
+    3d_lm_flow_1.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_flow_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_2.glsl
+    3d_lm_flow_2.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_flow_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_4.glsl
+    3d_lm_flow_4.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_flow_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_8.glsl
+    3d_lm_flow_8.gsh)
+wut_compile_shaders(
+    src/client/refresh/wiiu/shaders/3d_lm_flow_vert.glsl
+    src/client/refresh/wiiu/shaders/3d_lm_frag_16.glsl
+    3d_lm_flow_16.gsh)
 # wut_compile_shaders(
 # 	src/client/refresh/wiiu/shaders/3d_lm_flow_vert.glsl
 # 	src/client/refresh/wiiu/shaders/3d_lm_no_color_frag.glsl

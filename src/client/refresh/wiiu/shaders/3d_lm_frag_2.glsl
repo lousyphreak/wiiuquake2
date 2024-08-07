@@ -72,7 +72,7 @@ void main()
     lmTex     += texture(lightmap2, passLMcoord);// * lmScales[2];
     lmTex     += texture(lightmap3, passLMcoord);// * lmScales[3];
 
-    for(uint i=0u; i<32; ++i)
+    for(uint i=0u; i<2; ++i)
     {
         // I made the following up, it's probably not too cool..
         // it basically checks if the light is on the right side of the surface
