@@ -1,9 +1,9 @@
 # wiiuQuake2
 
-This port is based on yquake2, and the gl3 renderer. It runs the main game stable
-(startup demo loop for hours), allows switching mods (ONLY during the intro video).
-Currently it only runs at ~20fps (rarely hitting 30) during the demo loop on the
-console, and 60fps on Cemu with the CPU interpreter.
+This port is based on yquake2, and the gl3 renderer. The main game and xatrix/rogue
+addons run stable (startup demo loop for hours).
+Runs (mostly) at 60 fps, except if there are too many dynamic lights active, and
+sometimes has short hangs (probably reading music from the sd-card).
 
 Built with 100% open source tools, tested with Cemu and on real hardware.
 
@@ -50,16 +50,13 @@ The only other data required is the quake2 data files on the sd-card.
 
 ## Bugs
 
-- Switching mods crashes game once a game has been loaded
-  You can switch while the initial video is played and the demo levels have not yet been loaded
+- Currently none known
 
 ### Cemu Bug
 
 There is a bug in the Cemu PPC recompiler (i think), that causes endian conversion for floats
-to fail, if you run into this you can compile with a define `__FLOAT_HACK__` (see in CMakeLists.txt),
-or run Cemu with `--force-interpreter`. This also does not affect real hardware.
-
-(Yes, i am preparing a bug report with a minimal repro)
+to fail, if you run into this you can compile with a define `__FLOAT_HACK__`, or run Cemu with
+`--force-interpreter`. This also does not affect real hardware.
 
 ## Added CVars
 
@@ -76,13 +73,18 @@ or run Cemu with `--force-interpreter`. This also does not affect real hardware.
 
     copy TV image to DRC (make game playable on WiiU gamepad), has small performance hit
 
+- **wiiu_lightcap**
+
+    cap the maximum number of dynamic lights, currently > 4 may cause slowdowns. Defaults to 32 (the maximum).
+
 ## TODO
 
+- optimize the lightmap shader (3d_lm(flow)_frag), currently it is split into multiple shaders
+  each supporting different lights.
 - exiting from ingame, exit via HOME button or console shutdown works
 - FBO (post effects), has partial implementation
 - multisampling, requires reimplementation of WUT gfx implementation
 - stencil & scissor (shadows?), requires reimplementation of WUT gfx implementation
-- some clear color stuff glClearColor
 - round particles, gl_PointCoord always zero, might be some broken state
 
 ## (maybe interesting?) things for WiiU devs
