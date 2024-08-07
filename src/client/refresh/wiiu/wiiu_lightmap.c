@@ -59,7 +59,7 @@ WiiU_LM_UploadBlock(void)
 			gl3_lms.lmTex[map].surface.depth = 1;
 			gl3_lms.lmTex[map].surface.mipLevels = 1;
 			gl3_lms.lmTex[map].surface.dim = GX2_SURFACE_DIM_TEXTURE_2D;
-			gl3_lms.lmTex[map].surface.tileMode = GX2_TILE_MODE_LINEAR_ALIGNED;
+			gl3_lms.lmTex[map].surface.tileMode = GX2_TILE_MODE_DEFAULT;
 			gl3_lms.lmTex[map].surface.use = GX2_SURFACE_USE_TEXTURE;
 			gl3_lms.lmTex[map].viewNumSlices = 1;
 			gl3_lms.lmTex[map].compMap = GX2_COMP_MAP(GX2_SQ_SEL_R, GX2_SQ_SEL_G, GX2_SQ_SEL_B, GX2_SQ_SEL_A);
@@ -76,18 +76,21 @@ WiiU_LM_UploadBlock(void)
 			}
 			GX2InitTextureRegs(&gl3_lms.lmTex[map]);
 		}
-		uint32_t *texData = (uint32_t *)GX2RLockSurfaceEx(&gl3_lms.lmTex[map].surface, 0, GX2R_RESOURCE_BIND_NONE);
-		for(int i=0; i<BLOCK_HEIGHT; ++i)
-		{
-			int srcRowOffset = i * BLOCK_WIDTH;
-			int dstRowOffset = i * gl3_lms.lmTex[map].surface.pitch;
-			for(int j=0; j<BLOCK_WIDTH; ++j)
-			{
-				uint32_t src = ((uint32_t*)gl3_lms.lightmap_buffers[map])[srcRowOffset+j];
-				texData[dstRowOffset + j] = src;
-			}
-		}
-		GX2RUnlockSurfaceEx(&gl3_lms.lmTex[map].surface, 0, GX2R_RESOURCE_BIND_NONE);
+		GX2Surface lmSrc;
+		memset(&lmSrc, 0, sizeof(lmSrc));
+		lmSrc.format = GX2_SURFACE_FORMAT_UNORM_R8_G8_B8_A8;
+		lmSrc.width = BLOCK_WIDTH;
+		lmSrc.pitch = BLOCK_WIDTH;
+		lmSrc.height = BLOCK_HEIGHT;
+		lmSrc.depth = 1;
+		lmSrc.mipLevels = 1;
+		lmSrc.dim = GX2_SURFACE_DIM_TEXTURE_2D;
+		lmSrc.tileMode = GX2_TILE_MODE_LINEAR_SPECIAL;
+		lmSrc.use = GX2_SURFACE_USE_TEXTURE;
+		lmSrc.image = gl3_lms.lightmap_buffers[map];
+		lmSrc.imageSize = BLOCK_WIDTH*BLOCK_HEIGHT*4;
+		GX2CopySurface(&lmSrc, 0, 0, &gl3_lms.lmTex[map].surface, 0, 0);
+
 		GX2SetPixelTexture(&gl3_lms.lmTex[map], 2 + map);
 	}
 
