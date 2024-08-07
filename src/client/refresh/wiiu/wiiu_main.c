@@ -128,6 +128,7 @@ cvar_t *gl3_usefbo;
 
 cvar_t *wiiu_debugmips;
 cvar_t *wiiu_drc;
+cvar_t *wiiu_lightcap;
 
 
 
@@ -246,6 +247,7 @@ WiiU_Register(void)
 
 	wiiu_debugmips = ri.Cvar_Get("wiiu_debugmips", "0", 0); // turn all mipmap enabled textures to debug colors
 	wiiu_drc = ri.Cvar_Get("wiiu_drc", "1", CVAR_ARCHIVE); // enable DRC output
+	wiiu_lightcap = ri.Cvar_Get("wiiu_lightcap", "32", CVAR_ARCHIVE); // enable DRC output
 
 #if 0 // TODO!
 	//gl_lefthand = ri.Cvar_Get("hand", "0", CVAR_USERINFO | CVAR_ARCHIVE);

@@ -64,17 +64,20 @@ static menuslider_s s_vk_overbrightbits_slider;
 static menulist_s s_gl1_colorlight_list;
 static menulist_s s_gl3_colorlight_list;
 static menulist_s s_vk_dynamic_list;
+#ifndef __WIIU__
 static menulist_s s_fs_box;
 static menulist_s s_vsync_list;
 static menulist_s s_af_list;
 static menulist_s s_msaa_list;
 static menulist_s s_filter_list;
+#endif
 static menuaction_s s_defaults_action;
 static menuaction_s s_apply_action;
 
 #ifdef __WIIU__
 static cvar_t *wiiu_drc;
 static menulist_s s_wiiu_drc_list;
+static menuslider_s s_wiiu_lightcap_slider;
 #endif
 
 // --------
@@ -191,6 +194,7 @@ ResetDefaults(void *unused)
 #define CUSTOM_MODE_NAME "[Custom    ]"
 #define AUTO_MODE_NAME   "[Auto      ]"
 
+#ifndef __WIIU__
 static void
 ApplyFilter(void* unused)
 {
@@ -223,6 +227,7 @@ ApplyFilter(void* unused)
 		}
 	}
 }
+#endif
 
 static void
 ApplyChanges(void *unused)
@@ -284,6 +289,7 @@ ApplyChanges(void *unused)
 		Cvar_SetValue("crosshair_scale", r_hudscale->value);
 	}
 
+#ifndef __WIIU__
 	/* Restarts automatically */
 	if (vid_fullscreen->value != s_fs_box.curvalue)
 	{
@@ -302,6 +308,7 @@ ApplyChanges(void *unused)
 		Cvar_SetValue("r_vsync", s_vsync_list.curvalue);
 		restart = true;
 	}
+#endif
 
 #ifdef __WIIU__
 	if (wiiu_drc->value != s_wiiu_drc_list.curvalue)
@@ -320,6 +327,7 @@ ApplyChanges(void *unused)
 		Cvar_SetValue("gl1_colorlight", s_gl1_colorlight_list.curvalue);
 	}
 
+#ifndef __WIIU__
 	/* anisotropic filtering */
 	if (s_af_list.curvalue == 0)
 	{
@@ -355,6 +363,7 @@ ApplyChanges(void *unused)
 			restart = true;
 		}
 	}
+#endif
 
 	if (restart)
 	{
@@ -444,6 +453,7 @@ VID_MenuInit(void)
 		0
 	};
 
+#ifndef __WIIU__
 	static const char *fullscreen_names[] = {
 			"no",
 			"native fullscreen",
@@ -467,6 +477,7 @@ VID_MenuInit(void)
 		"custom",
 		0
 	};
+#endif
 
 	if (!r_mode)
 	{
@@ -693,6 +704,7 @@ VID_MenuInit(void)
 		s_uiscale_list.curvalue = GetCustomValue(&s_uiscale_list);
 	}
 
+#ifndef __WIIU__
 	s_fs_box.generic.type = MTYPE_SPINCONTROL;
 	s_fs_box.generic.name = "fullscreen";
 	s_fs_box.generic.x = 0;
@@ -706,6 +718,7 @@ VID_MenuInit(void)
 	s_vsync_list.generic.y = (y += 10);
 	s_vsync_list.itemnames = yesno_names;
 	s_vsync_list.curvalue = (r_vsync->value != 0);
+#endif
 
 #ifdef __WIIU__
 	s_wiiu_drc_list.generic.type = MTYPE_SPINCONTROL;
@@ -714,8 +727,19 @@ VID_MenuInit(void)
 	s_wiiu_drc_list.generic.y = (y += 10);
 	s_wiiu_drc_list.itemnames = yesno_names;
 	s_wiiu_drc_list.curvalue = (wiiu_drc->value != 0);
+
+	s_wiiu_lightcap_slider.generic.type = MTYPE_SLIDER;
+	s_wiiu_lightcap_slider.generic.name = "dynlights limit";
+	s_wiiu_lightcap_slider.generic.x = 0;
+	s_wiiu_lightcap_slider.generic.y = (y += 10);
+	s_wiiu_lightcap_slider.cvar = "wiiu_lightcap";
+	s_wiiu_lightcap_slider.minvalue = 0.0f;
+	s_wiiu_lightcap_slider.maxvalue = 32.0f;
+	s_wiiu_lightcap_slider.slidestep = 1;
+	s_wiiu_lightcap_slider.printformat = "%.0f";
 #endif
 
+#ifndef __WIIU__
 	s_af_list.generic.type = MTYPE_SPINCONTROL;
 	s_af_list.generic.name = "aniso filtering";
 	s_af_list.generic.x = 0;
@@ -795,6 +819,7 @@ VID_MenuInit(void)
 	}
 
 	s_filter_list.curvalue = mode;
+#endif
 
 	s_defaults_action.generic.type = MTYPE_ACTION;
 	s_defaults_action.generic.name = "reset to default";
@@ -838,8 +863,15 @@ VID_MenuInit(void)
 		Menu_AddItem(&s_opengl_menu, (void *)&s_gl1_colorlight_list);
 	}
 	Menu_AddItem(&s_opengl_menu, (void *)&s_uiscale_list);
+#ifndef __WIIU__
 	Menu_AddItem(&s_opengl_menu, (void *)&s_fs_box);
 	Menu_AddItem(&s_opengl_menu, (void *)&s_vsync_list);
+#endif
+#ifdef __WIIU__
+	Menu_AddItem(&s_opengl_menu, (void *)&s_wiiu_drc_list);
+	Menu_AddItem(&s_opengl_menu, (void *)&s_wiiu_lightcap_slider);
+#endif
+#ifndef __WIIU__
 	Menu_AddItem(&s_opengl_menu, (void *)&s_af_list);
 	Menu_AddItem(&s_opengl_menu, (void *)&s_msaa_list);
 	if (Q_stricmp(vid_renderer->string, "gl3") == 0 || Q_stricmp(vid_renderer->string, "gles3") == 0 ||
@@ -847,8 +879,6 @@ VID_MenuInit(void)
 	{
 		Menu_AddItem(&s_opengl_menu, (void *)&s_filter_list);
 	}
-#ifdef __WIIU__
-	Menu_AddItem(&s_opengl_menu, (void *)&s_wiiu_drc_list);
 #endif
 	Menu_AddItem(&s_opengl_menu, (void *)&s_defaults_action);
 	Menu_AddItem(&s_opengl_menu, (void *)&s_apply_action);

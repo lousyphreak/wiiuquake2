@@ -36,27 +36,31 @@ vec3_t lightspot;
 
 void WiiU_UseLMShader()
 {
-	if(gl3_newrefdef.num_dlights>16)
+	int numLights = gl3_newrefdef.num_dlights;
+	if(numLights > (int)wiiu_lightcap->value)
+		numLights = (int)wiiu_lightcap->value;
+
+	if(numLights>16)
 	{
 		WiiU_UseProgram(&gl3state.si3Dlm);
 	}
-	else if(gl3_newrefdef.num_dlights>8)
+	else if(numLights>8)
 	{
 		WiiU_UseProgram(&gl3state.si3Dlm16);
 	}
-	else if(gl3_newrefdef.num_dlights>4)
+	else if(numLights>4)
 	{
 		WiiU_UseProgram(&gl3state.si3Dlm8);
 	}
-	else if(gl3_newrefdef.num_dlights>2)
+	else if(numLights>2)
 	{
 		WiiU_UseProgram(&gl3state.si3Dlm4);
 	}
-	else if(gl3_newrefdef.num_dlights>1)
+	else if(numLights>1)
 	{
 		WiiU_UseProgram(&gl3state.si3Dlm2);
 	}
-	else if(gl3_newrefdef.num_dlights>0)
+	else if(numLights>0)
 	{
 		WiiU_UseProgram(&gl3state.si3Dlm1);
 	}
@@ -68,27 +72,31 @@ void WiiU_UseLMShader()
 
 void WiiU_UseLMFlowShader()
 {
-	if(gl3_newrefdef.num_dlights>16)
+	int numLights = gl3_newrefdef.num_dlights;
+	if(numLights > (int)wiiu_lightcap->value)
+		numLights = (int)wiiu_lightcap->value;
+
+	if(numLights>16)
 	{
 		WiiU_UseProgram(&gl3state.si3DlmFlow);
 	}
-	else if(gl3_newrefdef.num_dlights>8)
+	else if(numLights>8)
 	{
 		WiiU_UseProgram(&gl3state.si3DlmFlow16);
 	}
-	else if(gl3_newrefdef.num_dlights>4)
+	else if(numLights>4)
 	{
 		WiiU_UseProgram(&gl3state.si3DlmFlow8);
 	}
-	else if(gl3_newrefdef.num_dlights>2)
+	else if(numLights>2)
 	{
 		WiiU_UseProgram(&gl3state.si3DlmFlow4);
 	}
-	else if(gl3_newrefdef.num_dlights>1)
+	else if(numLights>1)
 	{
 		WiiU_UseProgram(&gl3state.si3DlmFlow2);
 	}
-	else if(gl3_newrefdef.num_dlights>0)
+	else if(numLights>0)
 	{
 		WiiU_UseProgram(&gl3state.si3DlmFlow1);
 	}

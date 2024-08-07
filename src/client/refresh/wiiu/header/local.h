@@ -525,5 +525,7 @@ extern cvar_t *gl3_debugcontext;
 
 extern cvar_t *wiiu_debugmips;
 extern cvar_t *wiiu_drc;
+extern cvar_t *wiiu_lightcap;
+
 
 #endif /* SRC_CLIENT_REFRESH_WiiU_HEADER_LOCAL_H_ */
