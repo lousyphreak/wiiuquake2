@@ -76,7 +76,13 @@ static menuaction_s s_apply_action;
 
 #ifdef __WIIU__
 static cvar_t *wiiu_drc;
+static cvar_t *r_2D_unfiltered;
+static cvar_t *r_3D_unfiltered;
+static cvar_t *r_lightmaps_unfiltered;
 static menulist_s s_wiiu_drc_list;
+static menulist_s s_r_2D_unfiltered_list;
+static menulist_s s_r_3D_unfiltered_list;
+static menulist_s s_r_lightmaps_unfiltered_list;
 static menuslider_s s_wiiu_lightcap_slider;
 #endif
 
@@ -315,6 +321,18 @@ ApplyChanges(void *unused)
 	{
 		Cvar_SetValue("wiiu_drc", s_wiiu_drc_list.curvalue);
 	}
+	if (r_2D_unfiltered->value == s_r_2D_unfiltered_list.curvalue)
+	{
+		Cvar_SetValue("r_2D_unfiltered", !s_r_2D_unfiltered_list.curvalue);
+	}
+	if (r_3D_unfiltered->value == s_r_3D_unfiltered_list.curvalue)
+	{
+		Cvar_SetValue("r_3D_unfiltered", !s_r_3D_unfiltered_list.curvalue);
+	}
+	if (r_lightmaps_unfiltered->value == s_r_lightmaps_unfiltered_list.curvalue)
+	{
+		Cvar_SetValue("r_lightmaps_unfiltered", !s_r_lightmaps_unfiltered_list.curvalue);
+	}
 #endif
 
 	if (gl3_colorlight && gl3_colorlight->value != s_gl3_colorlight_list.curvalue)
@@ -441,12 +459,14 @@ VID_MenuInit(void)
 		0
 	};
 
+#ifndef __WIIU__
 	static const char *onoff_names[] = {
 		"off",
 		"on",
 		0
 	};
-	
+#endif
+
 	static const char *yesno_names[] = {
 		"no",
 		"yes",
@@ -522,6 +542,21 @@ VID_MenuInit(void)
 	if (!wiiu_drc)
 	{
 		wiiu_drc = Cvar_Get("wiiu_drc", "1", CVAR_ARCHIVE);
+	}
+
+	if (!r_2D_unfiltered)
+	{
+		r_2D_unfiltered = Cvar_Get("r_2D_unfiltered", "1", CVAR_ARCHIVE);
+	}
+
+	if (!r_3D_unfiltered)
+	{
+		r_3D_unfiltered = Cvar_Get("r_3D_unfiltered", "1", CVAR_ARCHIVE);
+	}
+
+	if (!r_lightmaps_unfiltered)
+	{
+		r_lightmaps_unfiltered = Cvar_Get("r_lightmaps_unfiltered", "0", CVAR_ARCHIVE);
 	}
 
 	if (!gl_anisotropic)
@@ -728,6 +763,27 @@ VID_MenuInit(void)
 	s_wiiu_drc_list.itemnames = yesno_names;
 	s_wiiu_drc_list.curvalue = (wiiu_drc->value != 0);
 
+	s_r_2D_unfiltered_list.generic.type = MTYPE_SPINCONTROL;
+	s_r_2D_unfiltered_list.generic.name = "filter ui textures";
+	s_r_2D_unfiltered_list.generic.x = 0;
+	s_r_2D_unfiltered_list.generic.y = (y += 10);
+	s_r_2D_unfiltered_list.itemnames = yesno_names;
+	s_r_2D_unfiltered_list.curvalue = (r_2D_unfiltered->value == 0);
+
+	s_r_3D_unfiltered_list.generic.type = MTYPE_SPINCONTROL;
+	s_r_3D_unfiltered_list.generic.name = "filter world textures";
+	s_r_3D_unfiltered_list.generic.x = 0;
+	s_r_3D_unfiltered_list.generic.y = (y += 10);
+	s_r_3D_unfiltered_list.itemnames = yesno_names;
+	s_r_3D_unfiltered_list.curvalue = (r_3D_unfiltered->value == 0);
+
+	s_r_lightmaps_unfiltered_list.generic.type = MTYPE_SPINCONTROL;
+	s_r_lightmaps_unfiltered_list.generic.name = "filter lightmaps";
+	s_r_lightmaps_unfiltered_list.generic.x = 0;
+	s_r_lightmaps_unfiltered_list.generic.y = (y += 10);
+	s_r_lightmaps_unfiltered_list.itemnames = yesno_names;
+	s_r_lightmaps_unfiltered_list.curvalue = (r_lightmaps_unfiltered->value == 0);
+
 	s_wiiu_lightcap_slider.generic.type = MTYPE_SLIDER;
 	s_wiiu_lightcap_slider.generic.name = "dynlights limit";
 	s_wiiu_lightcap_slider.generic.x = 0;
@@ -869,7 +925,10 @@ VID_MenuInit(void)
 #endif
 #ifdef __WIIU__
 	Menu_AddItem(&s_opengl_menu, (void *)&s_wiiu_drc_list);
-	Menu_AddItem(&s_opengl_menu, (void *)&s_wiiu_lightcap_slider);
+	Menu_AddItem(&s_opengl_menu, (void *)&s_r_2D_unfiltered_list);
+	Menu_AddItem(&s_opengl_menu, (void *)&s_r_3D_unfiltered_list);
+	Menu_AddItem(&s_opengl_menu, (void *)&s_r_lightmaps_unfiltered_list);
+	Menu_AddItem(&s_opengl_menu, (void *)&s_r_lightmaps_unfiltered_list);
 #endif
 #ifndef __WIIU__
 	Menu_AddItem(&s_opengl_menu, (void *)&s_af_list);
